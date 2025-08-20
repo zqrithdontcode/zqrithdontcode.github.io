@@ -1,58 +1,88 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Racing Map</title>
+  <title>Test Race</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map {
-      height: 500px;
-      width: 100%;
-    }
-    table, th, td {
-      border: 1px solid black;
-      border-collapse: collapse;
-      padding: 5px;
-    }
+    #map { height: 400px; width: 100%; margin-bottom:10px; }
+    table, th, td { border: 1px solid black; border-collapse: collapse; padding: 5px; }
   </style>
 </head>
 <body>
-  <h1>My Racing Website</h1>
-  <div id="map"></div>
+<h1>Race Test</h1>
+<div id="map"></div>
 
-  <h2>Leaderboard</h2>
-  <table id="leaderboard">
-    <tr>
-      <th>Rank</th>
-      <th>Name</th>
-      <th>Time</th>
-    </tr>
-    <tr><td>1</td><td>Alice</td><td>5:30</td></tr>
-    <tr><td>2</td><td>Bob</td><td>6:10</td></tr>
-  </table>
+<button id="startBtn" disabled>Start Race</button>
+<div>Time elapsed: <span id="timer">--:--</span></div>
 
-  <script>
-    function initMap() {
-      const map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 14,
-        center: { lat: 37.7749, lng: -122.4194 } // change to your city
-      });
+<h2>Leaderboard</h2>
+<input id="name" placeholder="Your Name">
+<button onclick="finishRace()">Finish Race</button>
 
-      // Example race route
-      const racePath = new google.maps.Polyline({
-        path: [
-          { lat: 37.7749, lng: -122.4194 },
-          { lat: 37.7849, lng: -122.4094 },
-          { lat: 37.7949, lng: -122.4194 }
-        ],
-        geodesic: true,
-        strokeColor: "#FF0000",
-        strokeOpacity: 1.0,
-        strokeWeight: 3,
-      });
+<table id="leaderboard">
+<tr><th>Rank</th><th>Name</th><th>Time (seconds)</th></tr>
+</table>
 
-      racePath.setMap(map);
-    }
-  </script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"
-  async defer></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+const startLocation = {lat: 17.0123, lng: 95.6742}; // replace with your start location
+const endLocation = {lat: 17.0223, lng: 95.6842}; // replace with end location
+const map = L.map('map').setView([startLocation.lat, startLocation.lng], 14);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+ attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+L.polyline([ [startLocation.lat,startLocation.lng], [endLocation.lat,endLocation.lng] ], {color:'red'}).addTo(map);
+
+let raceStarted = false;
+let startTime, timerInterval;
+let results = JSON.parse(localStorage.getItem('raceResults')) || [];
+
+function renderLeaderboard() {
+  const table = document.getElementById('leaderboard');
+  table.innerHTML = '<tr><th>Rank</th><th>Name</th><th>Time (seconds)</th></tr>';
+  results.sort((a,b)=>a.time-b.time).forEach((r,i)=>{
+    const row = table.insertRow();
+    row.insertCell(0).innerText = i+1;
+    row.insertCell(1).innerText = r.name;
+    row.insertCell(2).innerText = r.time;
+  });
+}
+
+renderLeaderboard();
+
+// Enable start button only if user is near start
+navigator.geolocation.getCurrentPosition(pos=>{
+  const lat = pos.coords.latitude;
+  const lng = pos.coords.longitude;
+  const distance = Math.sqrt((lat-startLocation.lat)**2 + (lng-startLocation.lng)**2)*111000; // approx meters
+  if(distance < 50) document.getElementById('startBtn').disabled = false;
+});
+
+document.getElementById('startBtn').onclick = ()=>{
+  raceStarted = true;
+  startTime = Date.now();
+  document.getElementById('startBtn').disabled = true;
+  timerInterval = setInterval(()=>{
+    const elapsed = Math.floor((Date.now()-startTime)/1000);
+    document.getElementById('timer').innerText = elapsed + " s";
+  },1000);
+};
+
+function finishRace(){
+  if(!raceStarted) return alert("Start race first!");
+  clearInterval(timerInterval);
+  const elapsed = Math.floor((Date.now()-startTime)/1000);
+  const name = document.getElementById('name').value;
+  if(!name) return alert("Enter name!");
+  results.push({name, time:elapsed});
+  localStorage.setItem('raceResults', JSON.stringify(results));
+  renderLeaderboard();
+  raceStarted = false;
+  document.getElementById('timer').innerText = "--:--";
+  document.getElementById('name').value = "";
+}
+</script>
 </body>
 </html>
