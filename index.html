@@ -1,10 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Driving Page</title>
+  <title>Racing Map</title>
+  <style>
+    #map {
+      height: 500px;
+      width: 100%;
+    }
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 5px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <p>Welcome to my GitHub Page.</p>
+  <h1>My Racing Website</h1>
+  <div id="map"></div>
+
+  <h2>Leaderboard</h2>
+  <table id="leaderboard">
+    <tr>
+      <th>Rank</th>
+      <th>Name</th>
+      <th>Time</th>
+    </tr>
+    <tr><td>1</td><td>Alice</td><td>5:30</td></tr>
+    <tr><td>2</td><td>Bob</td><td>6:10</td></tr>
+  </table>
+
+  <script>
+    function initMap() {
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 14,
+        center: { lat: 37.7749, lng: -122.4194 } // change to your city
+      });
+
+      // Example race route
+      const racePath = new google.maps.Polyline({
+        path: [
+          { lat: 37.7749, lng: -122.4194 },
+          { lat: 37.7849, lng: -122.4094 },
+          { lat: 37.7949, lng: -122.4194 }
+        ],
+        geodesic: true,
+        strokeColor: "#FF0000",
+        strokeOpacity: 1.0,
+        strokeWeight: 3,
+      });
+
+      racePath.setMap(map);
+    }
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"
+  async defer></script>
 </body>
 </html>
