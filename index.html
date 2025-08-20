@@ -25,13 +25,18 @@
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-const startLocation = {lat: 17.0123, lng: 95.6742}; // replace with your start location
-const endLocation = {lat: 17.0223, lng: 95.6842}; // replace with end location
-const map = L.map('map').setView([startLocation.lat, startLocation.lng], 14);
+const startLocation = {lat: 16.8171, lng: 95.6164}; // Kyaiklat
+const endLocation = {lat: 16.8812, lng: 95.6121};   // Maubin
+const map = L.map('map').setView([startLocation.lat, startLocation.lng], 13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
  attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
+
+L.polyline([ 
+  [startLocation.lat, startLocation.lng], 
+  [endLocation.lat, endLocation.lng] 
+], {color:'red'}).addTo(map);
 
 L.polyline([ [startLocation.lat,startLocation.lng], [endLocation.lat,endLocation.lng] ], {color:'red'}).addTo(map);
 
