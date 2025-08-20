@@ -57,13 +57,21 @@ function renderLeaderboard() {
 
 renderLeaderboard();
 
-// Enable start button only if user is near start
-navigator.geolocation.getCurrentPosition(pos=>{
-  const lat = pos.coords.latitude;
-  const lng = pos.coords.longitude;
-  const distance = Math.sqrt((lat-startLocation.lat)**2 + (lng-startLocation.lng)**2)*111000; // approx meters
-  if(distance < 50) document.getElementById('startBtn').disabled = false;
-});
+const urlParams = new URLSearchParams(window.location.search);
+const testMode = urlParams.get('test') === 'true';
+
+if(testMode){
+  // Simulate being at start location
+  document.getElementById('startBtn').disabled = false;
+} else {
+  // Real geolocation check
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+    const distance = Math.sqrt((lat-startLocation.lat)**2 + (lng-startLocation.lng)**2)*111000; 
+    if(distance < 50) document.getElementById('startBtn').disabled = false;
+  });
+}
 
 document.getElementById('startBtn').onclick = ()=>{
   raceStarted = true;
